@@ -1,0 +1,84 @@
+[en]
+CL_ASSIST = You've gained!g %d EXP!t for assisting!g %s %s
+CL_BONUS_EXP = Bonus EXP:!g %d
+CL_BONUS_AP = Bonus AP:!g %d
+CL_CONNECT_MESSAGE = %s !tis connected !y| Level:!g %s!y | EXP :!g %d |
+CL_CHANGE_NAME2 = %s, !gyour name has been changed into !y%s!
+CL_CHANGE_NAME3 = %s, !gyour level and EXP will be transferred to your new name!
+CL_CHANGE_NAME4 = Transferring is completed!
+CL_DEALT_DAMAGE = You've gained!t %d EXP!y for dealing a damage of!t %d
+CL_HEADSHOT_KILL = You've gained!g %d EXP!y for killing a zombie with a headshot
+CL_INFORM = Level:!g %s !t| Bonus Health:!y %d !t| Bonus Armor:!g %d
+CL_INFORM_2 = Just !ysay /cles !tto open the !gCustom Level !tmenu
+CL_INFORM_3 = Just !ysay /savecl !tto save your current EXP!
+CL_INFECT = You've gained!g %d EXP!y for infecting a human
+CL_KILL = You've gained!g %d EXP!y for killing a zombie
+CL_KILL_HUMAN = You've gained!g %d EXP!y for killing a human
+CL_KILL_SURVIVOR = You've gained!g %d EXP!y for killing a survivor
+CL_KILL_NEMESIS = You've gained!g %d EXP!y for killing a nemesis
+CL_LEVEL_UP = Congratulations, your level now is!g %s
+CL_SHOW_STAT = Level:!g %s!y | EXP for next level:!g %d
+CL_SAVE = Saving completed!
+CL_HUMAN_WIN = Humans have recieved!g %d EXP!y for defeating the plague
+CL_HUMAN_SURVIVE = Humans have recieved!g %d EXP!y for survive in this round
+CL_ZOMBIE_WIN = Zombies have recieved!g %d EXP!y for infecting all humans
+
+[hu]
+CL_ASSIST = Kaptal!g %d tapasztalat pontot !t mert sebeztel!g %s %s
+CL_BONUS_EXP = Bonusz EXP:!g %d
+CL_BONUS_AP = Bonusz AP:!g %d
+CL_CONNECT_MESSAGE = %s !tis csatlakozik !y| Szint:!g %s!y | Tapasztalat pont :!g %d |
+CL_DEALT_DAMAGE = Kaptal!t %d Tapasztalat pontot!y mert sebeztel:!t %d
+CL_HEADSHOT_KILL = Kaptal!g %d Tapasztalat pontot!y mert megoltel egy zombit fejlovessel
+CL_INFORM = Szint:!g %s !t| Bonusz Elet:!y %d !t| Bonusz Pajzs:!g %d
+CL_INFORM_2 = !tCsak nyomj !y[N] !thogy megnyisd a !gSzint !tmenu-t
+CL_INFECT = Kaptal!g %d Tapasztalat pontot!y mert megfertoztel egy embert
+CL_KILL = Kaptal!g %d Tapasztalat pontot!y mert megoltel egy zombit
+CL_KILL_HUMAN = Kaptal!g %d Tapasztalat pontot!y mert megoltel egy embert
+CL_KILL_SURVIVOR = Kaptal!g %d Tapasztalat pontot !y mert megolted a tulelot 
+CL_KILL_NEMESIS = Kaptal!g %d Tapasztalat pontot !y mert megolted a nemesist
+CL_LEVEL_UP = Gratulalok, szinted !g %s
+CL_SHOW_STAT = Szint:!g %s!y | Tapasztalat pont kell a kovetkezo szintig:!g %d
+CL_HUMAN_WIN = Az emberek kaptak!g %d Tapasztalat pontot!y mert lenyomtak a pestist
+CL_HUMAN_SURVIVE = Az emberek kaptak!g %d Tapasztalat pontot!y mert tuleltek a kort
+CL_ZOMBIE_WIN = Zombik kaptak!g %d Tapasztalat pontot!y mert megfertoztek az osszes embert
+
+[lt]
+CL_ASSIST = Tu gavai!g %d XP!t uz padejima!g %s %s
+CL_BONUS_EXP = Priemoka XP:!g %d
+CL_BONUS_AP = Priemoka AP:!g %d
+CL_CONNECT_MESSAGE = %s !tprisijunge !y| Lygis:!g %s!y | XP :!g %d |
+CL_DEALT_DAMAGE = Tu gavai!t %d XP!y uz zala!t %d
+CL_HEADSHOT_KILL = Tu gavai!g %d XP!y uz zombio nuzudyma (headshot)
+CL_INFORM = Lygis:!g %s !t| Gyvybiu priedas:!y %d !t| Sarvu priedas:!g %d
+CL_INFORM_2 = !tSpauska !y[N] !tkad atidaryti !gLygiu !tmeniu
+CL_INFECT = Tu gavai!g %d XP!y uz zmogaus uzkretima
+CL_KILL = Tu gavai!g %d XP!y uz zombio nuzudyma
+CL_KILL_HUMAN = Tu gavai!g %d XP!y uz zmogaus nuzudyma
+CL_KILL_SURVIVOR = Tu gavai!g %d XP!y uz isgyventojo nuzudyma
+CL_KILL_NEMESIS = Tu gavai!g %d XP!y uz nemesio nuzudyma
+CL_LEVEL_UP = Sveikiname, tavo lygis yra!g %s
+CL_SHOW_STAT = Lygis:!g %s!y | XP iki kito lygio:!g %d
+CL_HUMAN_WIN = Zmones gavo!g %d XP!y uz maro isgyvenima
+CL_HUMAN_SURVIVE = Zmones gavo!g %dEXP!y uz sio raundo isgyvenima
+CL_ZOMBIE_WIN = Zombiai gavo!g %d XP!y uz visu zmoniu uzkretima
+
+[pl]
+CL_ASSIST = Otrzymales!g %d EXPA!t za asyste!g %s %s
+CL_BONUS_EXP = Bonus EXPA:!g %d
+CL_BONUS_AP = Bonus AP:!g %d
+CL_CONNECT_MESSAGE = %s !twbija na serwer !y| Level:!g %s!y | EXP :!g %d |
+CL_DEALT_DAMAGE = Otrzymales!t %d EXPA!y za zadnie!t %d obrazen
+CL_HEADSHOT_KILL = Otrzymales!g %d EXPA!y za zabicie zombie przez head shoot.
+CL_INFORM = Level:!g %s !t| Bonus Zycia:!y %d !t| Bonus Kamizelki:!g %d
+CL_INFORM_2 = !tNacisnij !y[N] !taby otworzyc !gCustom Level !tmenu
+CL_INFECT = Otrzymales!g %d EXPA!y za infekcje czlowieka.
+CL_KILL = Otrzymales!g %d EXPA!y za zabicie zombie.
+CL_KILL_HUMAN = Otrzymales!g %d EXPA!y za zabicie czlowieka.
+CL_KILL_SURVIVOR = Otrzymales!g %d EXPA!y za zabicie survivora.
+CL_KILL_NEMESIS = Otrzymales!g %d EXPA!y za zabicie nemesisa.
+CL_LEVEL_UP = Gratulacje! Awansowales do !g %s levela.
+CL_SHOW_STAT = Level:!g %s!y | EXP do nastepnego levela:!g %d
+CL_HUMAN_WIN = Ludzie otrzymali!g %d EXPA!y za przezycie
+CL_HUMAN_SURVIVE = Ludzie otrzymali!g %d EXPA!y za przetrwanie rundy.
+CL_ZOMBIE_WIN = Zombie otrzymali!g %d EXPA!y za zainfekowanie wszystkich ludzi. 
