@@ -1,3 +1,3 @@
-This plugin will allow you to give reward or bonus easily. Just visit below website to learn more about this plugin:
+THIS PLUGIN WILL ALLOW YOU TO GIVE REWARD OR BONUS EASILY. JUST VISIT BELOW WEBSITE TO LEARN MORE ABOUT THIS PLUGIN:
 
 https://forums.alliedmods.net/showthread.php?t=245805
