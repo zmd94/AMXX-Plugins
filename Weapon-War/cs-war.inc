@@ -78,9 +78,3 @@ forward cs_fw_vote_start();
  * This is called during a war vote is end
  */
 forward cs_fw_vote_end();
-
-/**
- * This is called during player respawn
- * param id - ID of client
- */
-forward cs_fw_war_spawn(id);
