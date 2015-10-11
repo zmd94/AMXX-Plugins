@@ -1,6 +1,6 @@
 /*
-	-----------------------------------------------
-	Copyright(C). 2015. zmd94 ;)
+
+	Copyright(C). 2014. zmd94 ;)
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -14,11 +14,10 @@
 	
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
-	-----------------------------------------------
+
 */
-//Uncomment 'IM_USING_ZP50' if your server is running ZP50 and above
-#define IM_USING_ZP50
+// Uncomment 'IM_USING_ZP50' if your server is running ZP50 and above
+//#define IM_USING_ZP50
 
 // if you are using this Custom Level for ZPA, 
 // just change line below into #include <zombie_plague_advance> 
@@ -31,7 +30,7 @@
 //#define DATA_EXPIRED
 
 //Uncomment 'CHANGE_NAME' if your want to enable player to change their name
-#define CHANGE_NAME
+//#define CHANGE_NAME
 
 #include <amxmodx>
 #include <fakemeta>
@@ -40,13 +39,11 @@
 #include <nvault>
 #include <engine>
 #include <fun>
-
 #if defined IM_USING_ZP50
-#include <zp50_core>
 #include <zp50_class_zombie>
 #endif
 
-new const VERSION[] = "3.1"
+new const VERSION[] = "3.2"
 new const VAULTNAME[] = "custom_level"
 new const RANKS[][]=
 {
@@ -102,9 +99,6 @@ new const EXP[] =
 // Bool
 new bool:g_bKilledZombie[MAXPLAYERS+1][33]
 
-// Float
-new Float:g_fIconTime
-
 // String
 new g_szMotd[1536]
 new g_sName[MAXPLAYERS+1][32]
@@ -117,34 +111,23 @@ new g_iSteamID[MAXPLAYERS+1][32]
 new g_iZombieScore, g_iHumanScore
 new g_iVault, g_msgSayText
 
-new g_iELevelBonus, g_iEAPRewards, g_iEHitRecieved, g_iEHitDealt, g_iEShowScore, g_iEHumanWin
+new g_iELevelBonus, g_iEAPRewards, g_iEHitRecieved, g_iEHitDealt, g_iEShowScore, g_iEHumanWin, g_iEHumanWinBonus
+, g_iEZombieWinBonus, g_iEZombieInfectBonus, g_iESurvKillBonus, g_iENemKillBonus, g_iEDamageEXP
 , g_iEHPBonus, g_iEArmorBonus
 
 new g_iSaveType, g_iConnectMessage, g_iELevelIcon, g_iLevelIconTime, g_iEInformHud, g_iHudLocation
-, g_iHudColors, g_iScoreColors, g_iHumanEXP, g_iHeadShotEXP, g_iLevelEXPBonus, g_iLevelHPBonus
-, g_iLevelArBonus, g_iLevelAPBonus
-
-new g_CHumanEXP, g_CHeadEXP, g_CLevelEXP, g_CIcon, g_CSaveType
+, g_iHudColors, g_iScoreColors, g_iHumanEXP, g_iZombieEXP, g_iHeadShotEXP, g_iLevelEXPBonus, g_iLevelHPBonus
+, g_iLevelArBonus, g_iLevelAPBonus, g_iHumanWinEXP, g_iZombieWinEXP, g_iInfectEXP, g_iSurKillEXP
+, g_iNemKillEXP, g_iDamageAmount, g_iDamageEXP
 
 #if defined IM_USING_ZP50
 new g_iMaxHealth[MAXPLAYERS+1]
 new g_iEAssistEXP, g_iAssistEXP, g_iAssistDivide
-new g_CAssistEXP, g_CAssistDivide
 #endif
 
 #if defined DATA_EXPIRED
 new g_iDataExpired
 #endif
-
-public plugin_precache()
-{
-	new szFile[35]
-	for(new i = 0; i < sizeof(RANKS); i++)
-	{
-		formatex(szFile, charsmax(szFile), "sprites/zombie_plague/level/%i.spr", i)
-		g_iSprite[i] = precache_model(szFile)
-	}
-}
 
 public plugin_init()
 {
@@ -189,7 +172,7 @@ public plugin_init()
 	#endif
 	g_iConnectMessage = register_cvar("cl_connect_message", "1") // Enable connect message
 	g_iHumanEXP = register_cvar("cl_human_EXP", "1") // Amount of EXP gain from killing a zombie without headshot
-	// g_iZombieEXP = register_cvar("cl_zombie_EXP", "1") // Amount of EXP gain from killing a human
+	g_iZombieEXP = register_cvar("cl_zombie_EXP", "1") // Amount of EXP gain from killing a human
 	g_iHeadShotEXP = register_cvar("cl_level_head_EXP", "2") //  Amount of EXP gain from killing a zombie with headshot
 	g_iELevelIcon = register_cvar("cl_level_icon", "1") // Enable level icon
 	g_iLevelIconTime = register_cvar("cl_level_icon_time", "1.5") // The time for the icon to stay displaying
@@ -204,24 +187,24 @@ public plugin_init()
 	g_iEInformHud = register_cvar("cl_level_hud", "1") // Enable level hud information
 	g_iHudColors = register_cvar("cl_hud_colors", "255 0 0")
 	g_iHudLocation = register_cvar("cl_hud_position", "2") // 1; The position of hud information is in the left | 2; The position of hud information is in the right
-	// g_iEDamageEXP = register_cvar("cl_level_damage", "1") // Enable human to recieve EXP from dealing a damage 
-	// g_iDamageAmount = register_cvar("cl_damage_amount", "950") // Amount of damage need to recieve EXP for human
-	// g_iDamageEXP = register_cvar("cl_damage_EXP_amount", "1") // Amount of EXP gain from dealing a damage
+	g_iEDamageEXP = register_cvar("cl_level_damage", "1") // Enable human to recieve EXP from dealing a damage 
+	g_iDamageAmount = register_cvar("cl_damage_amount", "950") // Amount of damage need to recieve EXP for human
+	g_iDamageEXP = register_cvar("cl_damage_EXP_amount", "1") // Amount of EXP gain from dealing a damage
 	g_iEHitRecieved = register_cvar("cl_show_hit_recieved", "1") // Enable showing recieved damage 
 	g_iEHitDealt = register_cvar("cl_show_hit_dealt", "1") // Enable showing dealt damage
 	g_iEShowScore = register_cvar("cl_show_score", "1") // Enable showing score for zombie and human
 	g_iScoreColors = register_cvar("cl_score_colors", "0 255 0")
 	g_iEHumanWin = register_cvar("cl_human_win", "1") // Enable human to be a winner if nobody win
-	// g_iEHumanWinBonus = register_cvar("cl_human_win_bonus", "1") // Enable win bonus for human
-	// g_iHumanWinEXP = register_cvar("cl_human_win_amount", "1") // EXP given to human for winning
-	// g_iEZombieWinBonus = register_cvar("cl_zombie_win_bonus", "1") // Enable win bonus for zombie
-	// g_iZombieWinEXP = register_cvar("cl_zombie_win_amount", "1") // EXP given to zombie for winning
-	// g_iEZombieInfectBonus = register_cvar("cl_zombie_infect_bonus", "1") // Enable EXP bonus for zombie when infecting human
-	// g_iInfectEXP = register_cvar("cl_zombie_infect_amount", "1") // EXP given to zombie for infecting human
-	// g_iESurvKillBonus = register_cvar("cl_survivor_kill_bonus", "1") // Enable kill bonus when killing survivor
-	// g_iSurKillEXP = register_cvar("cl_survivor_bonus_amount", "1") // Then amount of EXP bonus by killing survivor
-	// g_iENemKillBonus = register_cvar("cl_nemesis_kill_bonus", "1") // Enable kill bonus when killing nemesis
-	// g_iNemKillEXP = register_cvar("cl_nemesis_bonus_amount", "1") // Then amount of EXP bonus by killing nemesis
+	g_iEHumanWinBonus = register_cvar("cl_human_win_bonus", "1") // Enable win bonus for human
+	g_iHumanWinEXP = register_cvar("cl_human_win_amount", "1") // EXP given to human for winning
+	g_iEZombieWinBonus = register_cvar("cl_zombie_win_bonus", "1") // Enable win bonus for zombie
+	g_iZombieWinEXP = register_cvar("cl_zombie_win_amount", "1") // EXP given to zombie for winning
+	g_iEZombieInfectBonus = register_cvar("cl_zombie_infect_bonus", "1") // Enable EXP bonus for zombie when infecting human
+	g_iInfectEXP = register_cvar("cl_zombie_infect_amount", "1") // EXP given to zombie for infecting human
+	g_iESurvKillBonus = register_cvar("cl_survivor_kill_bonus", "1") // Enable kill bonus when killing survivor
+	g_iSurKillEXP = register_cvar("cl_survivor_bonus_amount", "1") // Then amount of EXP bonus by killing survivor
+	g_iENemKillBonus = register_cvar("cl_nemesis_kill_bonus", "1") // Enable kill bonus when killing nemesis
+	g_iNemKillEXP = register_cvar("cl_nemesis_bonus_amount", "1") // Then amount of EXP bonus by killing nemesis
 	#if defined IM_USING_ZP50
 	g_iEAssistEXP = register_cvar("cl_enable_assist", "1") // Enable EXP given for assisting players
 	g_iAssistEXP = register_cvar("cl_level_assist_EXP", "1") // Amount of EXP gain from assisting a non-zombie killer.
@@ -241,22 +224,24 @@ public plugin_init()
 	}
 }
 
+public plugin_precache()
+{
+	if(get_pcvar_num(g_iELevelIcon))
+	{
+		new szFile[35]
+		for(new i = 0; i < sizeof(RANKS); i++)
+		{
+			formatex(szFile, charsmax(szFile), "sprites/zombie_plague/level/%i.spr", i)
+			g_iSprite[i] = precache_model(szFile)
+		}
+	}
+}
+
 public plugin_cfg()
 {
 	new sCFGdir[32]
 	get_configsdir(sCFGdir, charsmax(sCFGdir))
 	server_cmd("exec %s/cl_system.cfg", sCFGdir)
-	
-	g_CSaveType = get_pcvar_num(g_iSaveType)
-	g_CHumanEXP = get_pcvar_num(g_iHumanEXP)
-	g_CHeadEXP = get_pcvar_num(g_iHeadShotEXP)
-	g_CLevelEXP = get_pcvar_num(g_iLevelEXPBonus)
-	g_CIcon = get_pcvar_num(g_iELevelIcon)
-	g_fIconTime = get_pcvar_float(g_iLevelIconTime)
-	#if defined IM_USING_ZP50
-	g_CAssistEXP = get_pcvar_num(g_iAssistEXP)
-	g_CAssistDivide = get_pcvar_num(g_iAssistDivide)
-	#endif
 	
 	g_iVault = nvault_open(VAULTNAME)
 	if(g_iVault == INVALID_HANDLE)
@@ -264,16 +249,14 @@ public plugin_cfg()
 		new szText[128]; formatex(szText, 127, "Error opening CLeS database [%s]", VAULTNAME);
 		set_fail_state(szText)
 	}
-	else
-	{
-		server_print("CLeS database [%s] successfully loaded!", VAULTNAME)
 	
-		#if defined DATA_EXPIRED
-		nvault_prune(g_iVault, 0, get_systime() - (86400 * get_pcvar_num(g_iDataExpired)))
-		#endif
+	server_print("CLeS database [%s] successfully loaded!", VAULTNAME)
 	
-		FormatTop(TOPLEVEL)
-	}
+	#if defined DATA_EXPIRED
+	nvault_prune(g_iVault, 0, get_systime() - (86400 * get_pcvar_num(g_iDataExpired)))
+	#endif
+	
+	FormatTop(TOPLEVEL)
 }
 
 public plugin_end()
@@ -283,6 +266,8 @@ public plugin_end()
 
 public zp_round_ended(iTeam)
 {
+	new iPlayers[MAXPLAYERS], iPlayerCount, i, player
+	
 	switch(iTeam)
 	{
 		case WIN_ZOMBIES: 
@@ -291,6 +276,22 @@ public zp_round_ended(iTeam)
 			{
 				g_iZombieScore ++ 
 			}
+			
+			if(get_pcvar_num(g_iEZombieWinBonus))
+			{
+				get_players(iPlayers, iPlayerCount, "ac") 
+				for(i = 0; i < iPlayerCount; i++)
+				{
+					player = iPlayers[i]
+					if(zp_get_user_zombie(player))
+					{
+						g_iXP[player] += get_pcvar_num(g_iZombieWinEXP)
+						sChatColor(player, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_ZOMBIE_WIN", get_pcvar_num(g_iZombieWinEXP))
+						
+						ReviewLevel(player)
+					}
+				}
+			}
 		}
 		case WIN_HUMANS: 
 		{
@@ -298,12 +299,44 @@ public zp_round_ended(iTeam)
 			{
 				g_iHumanScore ++ 
 			}
+			
+			if(get_pcvar_num(g_iEHumanWinBonus))
+			{
+				get_players(iPlayers, iPlayerCount, "ac") 
+				for(i = 0; i < iPlayerCount; i++)
+				{	
+					player = iPlayers[i]
+					if(!zp_get_user_zombie(player))
+					{
+						g_iXP[player] += get_pcvar_num(g_iHumanWinEXP)
+						sChatColor(player, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_HUMAN_WIN", get_pcvar_num(g_iHumanWinEXP))
+						
+						ReviewLevel(player)
+					}
+				}
+			}
 		}
 		case WIN_NO_ONE: 
 		{
 			if(get_pcvar_num(g_iEHumanWin))
 			{
 				g_iHumanScore ++
+				
+				if(get_pcvar_num(g_iEHumanWinBonus))
+				{
+					get_players(iPlayers, iPlayerCount, "ac") 
+					for(i = 0; i < iPlayerCount; i++)
+					{
+						player = iPlayers[i]
+						if(!zp_get_user_zombie(player))
+						{
+							g_iXP[player] += get_pcvar_num(g_iHumanWinEXP)
+							sChatColor(player, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_HUMAN_SURVIVE", get_pcvar_num(g_iHumanWinEXP))
+							
+							ReviewLevel(player)
+						}
+					}
+				}
 			}
 		}
 	}
@@ -311,9 +344,7 @@ public zp_round_ended(iTeam)
 
 public client_authorized(id)
 {
-	// Just get the connecting users authid and store it in our global string array so it
-    // will not need to be retrieved every time we want to do an nvault transaction
-	switch(g_CSaveType)
+	switch(get_pcvar_num(g_iSaveType))
 	{
 		case 1:
 		{
@@ -475,6 +506,12 @@ public custom_menu(id)
 
 public custom_handler(id, menu, item)
 {
+	if(item == MENU_EXIT) 
+	{
+		menu_destroy(menu)
+		return PLUGIN_HANDLED
+	}
+	
 	switch(item)
 	{
 		case 0: show_global_top(id)
@@ -484,6 +521,7 @@ public custom_handler(id, menu, item)
 	}
 	
 	menu_destroy(menu)
+	return PLUGIN_HANDLED
 }
 
 #if defined CUSTOM_CHAT
@@ -507,8 +545,7 @@ public custom_say(id)
 		format(szMessage, charsmax(szMessage), "^1*DEAD* ^4[%s] ^3%s : ^1%s", RANKS[g_iLevel[id]], szName, szMessage)
 	}
 	
-	new iPlayers[32], iPlayerCount, i, player
-	
+	new iPlayers[MAXPLAYERS], iPlayerCount, i, player
 	get_players(iPlayers, iPlayerCount, "ch") 
 	for(i = 0; i < iPlayerCount; i++)
 	{
@@ -545,7 +582,7 @@ public custom_say_team(id)
 		format(szMessage, charsmax(szMessage), "^1*DEAD* ^4[%s] ^3%s : ^1%s", RANKS[g_iLevel[id]], szName, szMessage)
 	}
 	
-	new iPlayers[32], iPlayerCount, i, player
+	new iPlayers[MAXPLAYERS], iPlayerCount, i, player
 	get_players(iPlayers, iPlayerCount, "ch") 
 	for(i = 0; i < iPlayerCount; i++)
 	{
@@ -784,7 +821,7 @@ public save_data(id)
 
 public event_new_round()
 {
-	new iPlayers[32], iPlayerCount, i, player
+	new iPlayers[MAXPLAYERS], iPlayerCount, i, player
 	get_players(iPlayers, iPlayerCount, "a") 
 	for(i = 0; i < iPlayerCount; i++)
 	{
@@ -805,6 +842,7 @@ public event_Restart()
 public event_Damage(iVictim)
 {
 	static iAttacker; iAttacker = get_user_attacker(iVictim)
+	static iHit; iHit = read_data(2)
 	
 	new AttackerHud = CreateHudSyncObj()
 	new VictimHud = CreateHudSyncObj()
@@ -814,24 +852,57 @@ public event_Damage(iVictim)
 		
 	if(get_pcvar_num(g_iEHitRecieved))
 	{
-		static iHit; iHit = read_data(2)
 		set_hudmessage(255, 0, 0, 0.45, 0.50, 2, 0.1, 4.0, 0.1, 0.1, -1)
 		ShowSyncHudMsg(iVictim, VictimHud, "%i^n", iHit)	
 	}
 	
 	if(get_pcvar_num(g_iEHitDealt))
 	{
-		static iHit; iHit = read_data(2)
 		set_hudmessage(0, 100, 200, -1.0, 0.55, 2, 0.1, 4.0, 0.02, 0.02, -1)
 		ShowSyncHudMsg(iAttacker, AttackerHud, "%i^n", iHit)
 	}
-	#if defined IM_USING_ZP50
-	if(zp_core_is_zombie(iVictim) && !zp_get_user_survivor(iAttacker))
-	#else
+	
+	Show_spectate(iVictim, iAttacker, iHit)
+	
 	if(zp_get_user_zombie(iVictim) && !zp_get_user_survivor(iAttacker))
-	#endif
 	{
 		g_iDamage[iAttacker][iVictim] += read_data(2)
+		if (get_pcvar_num(g_iEDamageEXP))
+		{
+			if(g_iDamage[iAttacker][iVictim] >= get_pcvar_num(g_iDamageAmount))
+			{	
+				g_iXP[iAttacker] += get_pcvar_num(g_iDamageEXP)
+				
+				sChatColor(iAttacker, "^x04[CL]^x01 %L", LANG_PLAYER, "CL_DEALT_DAMAGE", get_pcvar_num(g_iDamageEXP), get_pcvar_num(g_iDamageAmount))
+				g_iDamage[iAttacker][iVictim] = 0
+				
+				ReviewLevel(iAttacker)
+			}
+		}
+	}
+}
+
+public Show_spectate(iVictim, iAttacker, iHit)
+{
+	new AttackerSpecHud = CreateHudSyncObj()
+	new VictimSpecHud = CreateHudSyncObj()
+	
+	new Players[MAXPLAYERS], iPlayerCount, i, id
+	get_players(Players, iPlayerCount, "bc") 
+	for (i = 0; i < iPlayerCount; i++) 
+	{
+		id = Players[i]
+		if (id != iVictim && entity_get_int(id, EV_INT_iuser2) == iVictim)
+		{
+			set_hudmessage(255, 0, 0, 0.45, 0.50, 2, 0.1, 4.0, 0.1, 0.1, -1)
+			ShowSyncHudMsg(id, VictimSpecHud, "%i^n", iHit)
+		}
+		
+		if (id != iAttacker && entity_get_int(id, EV_INT_iuser2) == iAttacker)
+		{
+			set_hudmessage(0, 100, 200, -1.0, 0.55, 2, 0.1, 4.0, 0.02, 0.02, -1)
+			ShowSyncHudMsg(id, AttackerSpecHud, "%i^n", iHit)			
+		}
 	}
 }
 
@@ -844,60 +915,89 @@ public event_DeathMsg()
 	if(iVictim == iKiller || !is_user_alive(iKiller))
 		return
 	
-	#if defined IM_USING_ZP50
-	if(!zp_core_is_zombie(iKiller))
-	#else
-	if(!zp_get_user_zombie(iKiller))
-	#endif
+	if(!zp_get_user_zombie(iKiller) || zp_get_user_survivor(iKiller))
 	{
-		if(iIsHeadshot)
+		if(zp_get_user_nemesis(iVictim))
 		{
-			g_bKilledZombie[iKiller][iVictim] = true
-			
-			g_iXP[iKiller] += g_CHeadEXP
-			sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_HEADSHOT_KILL", g_CHeadEXP)
+			if (get_pcvar_num(g_iESurvKillBonus))
+			{
+				g_iXP[iKiller] += get_pcvar_num(g_iNemKillEXP)
+				sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_KILL_NEMESIS", get_pcvar_num(g_iNemKillEXP))
+				
+				ReviewLevel(iKiller)
+			}
 		}
 		else
 		{
-			g_bKilledZombie[iKiller][iVictim] = true
-			
-			g_iXP[iKiller] += g_CHumanEXP
-			sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_KILL", g_CHumanEXP)
-		}
-			
-		ReviewLevel(iKiller)
-			
-		#if defined IM_USING_ZP50
-		if(get_pcvar_num(g_iEAssistEXP))
-		{
-			new iPlayers[32], iPlayerCount, i, id
-			get_players(iPlayers, iPlayerCount, "ah") 
-			for(i = 0; i < iPlayerCount; i++)
+			if(iIsHeadshot)
 			{
-				id = iPlayers[i]
+				g_bKilledZombie[iKiller][iVictim] = true
+				
+				g_iXP[iKiller] += get_pcvar_num(g_iHeadShotEXP)
+				sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_HEADSHOT_KILL", get_pcvar_num(g_iHeadShotEXP))
+			}
+			else
+			{
+				g_bKilledZombie[iKiller][iVictim] = true
+				
+				g_iXP[iKiller] += get_pcvar_num(g_iHumanEXP)
+				sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_KILL", get_pcvar_num(g_iHumanEXP))
+			}
+			
+			ReviewLevel(iKiller)
+			
+			#if defined IM_USING_ZP50
+			if(get_pcvar_num(g_iEAssistEXP))
+			{
+				new iPlayers[MAXPLAYERS], iPlayerCount, i, id
+				get_players(iPlayers, iPlayerCount, "ah") 
+				for(i = 0; i < iPlayerCount; i++)
+				{
+					id = iPlayers[i]
 					
-				if(g_iDamage[id][iVictim] >= g_iMaxHealth[iVictim]/ g_CAssistDivide)
-				{	
-					if(!g_bKilledZombie[id][iVictim] && !zp_core_is_zombie(id))
-					{
-						g_iXP[id] += g_CAssistEXP
-						
-						new szName[32]
-						get_user_name(iKiller, szName, charsmax(szName))
-						sChatColor(id, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_ASSIST", g_CAssistEXP, RANKS[g_iLevel[iKiller]], szName)
-						
-						ReviewLevel(id)
-						
-						g_iDamage[id][iVictim] = 0
-					}
-					else
-					{
-						g_bKilledZombie[id][iVictim] = false
+					if(g_iDamage[id][iVictim] >= g_iMaxHealth[iVictim]/ get_pcvar_num(g_iAssistDivide))
+					{	
+						if(!g_bKilledZombie[id][iVictim] && !zp_core_is_zombie(id))
+						{
+							g_iXP[id] += get_pcvar_num(g_iAssistEXP)
+							
+							new szName[32]
+							get_user_name(iKiller, szName, charsmax(szName))
+							sChatColor(id, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_ASSIST", get_pcvar_num(g_iAssistEXP), RANKS[g_iLevel[iKiller]], szName)
+							
+							ReviewLevel(id)
+							
+							g_iDamage[id][iVictim] = 0
+						}
+						else
+						{
+							g_bKilledZombie[id][iVictim] = false
+						}
 					}
 				}
 			}
+			#endif
 		}
-		#endif
+	}
+	else if(zp_get_user_zombie(iKiller) || zp_get_user_nemesis(iKiller))
+	{
+		if(zp_get_user_survivor(iVictim))
+		{
+			if(get_pcvar_num(g_iENemKillBonus))
+			{
+				g_iXP[iKiller] += get_pcvar_num(g_iSurKillEXP)
+				sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_KILL_SURVIVOR", get_pcvar_num(g_iSurKillEXP))
+				
+				ReviewLevel(iKiller)
+			}
+		}
+		else
+		{
+			g_iXP[iKiller] += get_pcvar_num(g_iZombieEXP)
+			sChatColor(iKiller, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_KILL_HUMAN", get_pcvar_num(g_iZombieEXP))
+			
+			ReviewLevel(iKiller)
+		}
 	}
 }
 
@@ -910,7 +1010,7 @@ public ReviewLevel(id)
 		
 		if(get_pcvar_num(g_iELevelBonus))
 		{
-			g_iXP[id] += g_CLevelEXP
+			g_iXP[id] += get_pcvar_num(g_iLevelEXPBonus)
 			sChatColor(id, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_BONUS_EXP", get_pcvar_num(g_iLevelEXPBonus))
 		
 			iBonus(id)
@@ -926,21 +1026,16 @@ public ReviewLevel(id)
 
 public event_StatusValue(id)
 {
-	if(!g_CIcon)
+	if(!get_pcvar_num(g_iELevelIcon))
 		return
 	
 	new pid = read_data(2)
 	new pidlevel = g_iLevel[pid]
 	
-	#if defined IM_USING_ZP50
-	if(!pev_valid(pid) || !is_user_alive(pid) || zp_core_is_zombie(pid))
-		return
-	#else
 	if(!pev_valid(pid) || !is_user_alive(pid) || zp_get_user_zombie(pid))
 		return
-	#endif
 	
-	new flTime = floatround(g_fIconTime * 10)
+	new flTime = floatround(get_pcvar_float(g_iLevelIconTime) * 10)
 	if (flTime > 0)
 	{
 		Create_TE_PLAYERATTACHMENT(id, pid, 55, g_iSprite[pidlevel], flTime)
@@ -956,23 +1051,15 @@ public fw_PlayerRespawn(id)
 			set_task(5.0, "iBonus", id)
 		}
 		
-		set_task(4.0, "iInform", id)
+		set_task(50.0, "iInform", id)
 		set_task(120.0, "iSave", id)
 	}
 }
 
 public iBonus(id)
 {
-	if(is_user_alive(id))
+	if(is_user_alive(id) && !zp_get_user_zombie(id))
 	{
-		#if defined IM_USING_ZP50
-		if (zp_core_is_zombie(id))
-			return
-		#else
-		if (zp_get_user_zombie(id))	
-			return
-		#endif
-		
 		new iHealth = g_iLevel[id]* get_pcvar_num(g_iLevelHPBonus)
 		new iArmor = g_iLevel[id]* get_pcvar_num(g_iLevelArBonus)
 		
@@ -1023,6 +1110,31 @@ public zp_fw_core_infect_post(id, attacker)
 		return;
 	
 	g_iMaxHealth[id] = zp_class_zombie_get_max_health(id, zp_class_zombie_get_current(id))
+	
+	if(get_pcvar_num(g_iEZombieInfectBonus))
+	{
+		if (is_user_alive(attacker) && attacker != id)
+		{
+			g_iXP[attacker] += get_pcvar_num(g_iInfectEXP)
+			sChatColor(attacker, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_INFECT", get_pcvar_num(g_iInfectEXP))
+			
+			ReviewLevel(id)
+		}
+	}
+}
+#else
+public zp_user_infected_post(id, infector)
+{
+	if(get_pcvar_num(g_iEZombieInfectBonus))
+	{
+		if(is_user_alive(infector) && infector != id)
+		{
+			g_iXP[infector] += get_pcvar_num(g_iInfectEXP)
+			sChatColor(infector, "^x04[CL]^x03 %L", LANG_PLAYER, "CL_INFECT", get_pcvar_num(g_iInfectEXP))
+			
+			ReviewLevel(id)
+		}
+	}
 }
 #endif
 
@@ -1056,7 +1168,7 @@ public FwdClientUserInfoChanged( id, szBuffer )
 SaveData(id)
 {
 	new szData[32], szKey[40]
-	switch(g_CSaveType)
+	switch(get_pcvar_num(g_iSaveType))
 	{
 		case 1:
 		{
@@ -1075,7 +1187,7 @@ SaveData(id)
 LoadData(id)
 {
 	new szData[32], szKey[40]
-	switch(g_CSaveType)
+	switch(get_pcvar_num(g_iSaveType))
 	{
 		case 1:
 		{
@@ -1091,7 +1203,7 @@ LoadData(id)
 	{
 		new iSpacePos = contain(szData, " ")
 		if(iSpacePos > -1)
-		{    
+		{
 			new szLevel[8], szXP[32]
 			
 			parse(szData, szLevel, charsmax(szLevel), szXP, charsmax(szXP))
