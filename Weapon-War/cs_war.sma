@@ -1,5 +1,5 @@
 /*		
-		Copyright © 2014, zmd94.
+		Copyright © 2016, zmd94.
 
 		This plugin is free software;
 		you can redistribute it and/or modify it under the terms of the
