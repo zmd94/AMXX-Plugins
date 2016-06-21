@@ -118,3 +118,80 @@ CSWAR_VOTE_FAILED = Vote a échouer!
 CSWAR_NO_VOTE = Aucun vote dans !y%s round!
 
 CSWAR_NEXT_WAR = Prochainement c'est la %s guerre!
+
+[ur]
+CSWAR_EQUAL_POINT = Yaha per nishana nahi lagao!
+CSWAR_POINT_LEADER = %s ye guns points hai !y|| Points: %d!
+CSWAR_NEW_LEADER = Naya guns points!
+CSWAR_SAME_LEADER = Vahi point hai jo pehle tha!
+CSWAR_WHOIS_LEADER = %s naya point hai!
+
+CSWAR_WAR_START = %s round!
+CSWAR_WAR_HUD = Wahi round: ^n%s war!
+
+CSWAR_RESTRICT_IN_WAR = Ap ye command !yis %s round me use nahi karsakte!
+CSWAR_CURRENT_WAR = abi jung chir chuki hai !y%s war!
+CSWAR_BONUS = Free money: !y$%d!
+CSWAR_COMMAND_RESTRICT = Command istamal me nahi!
+
+CSWAR_VOTE_START = Vote !yalready hai. started!
+CSWAR_ADMIN_VOTE = ADMIN %s start !y%s vote!
+CSWAR_VOTE_TIME = %d seconds !yto vote!
+CSWAR_VOTE_SUCCESS = Voting sucessful!
+CSWAR_VOTE_FAILED = Voting failed!
+CSWAR_NO_VOTE = No voting in !y%s round!
+
+CSWAR_NEXT_WAR = Next is !y%s war!
+
+CSWAR_CON_WAR_HUD = Katarnak round: ^n%s war! ^nBakya round: %d!
+CSWAR_CON_WAR_START = Katarnak round start hochuka hai!
+CSWAR_CON_WAR_STOP = Katarnak round ki bend buj gie!
+
+[ru]
+CSWAR_EQUAL_POINT = Нету лидера по количеству очков!
+CSWAR_POINT_LEADER = %s лидер с %d очками!
+
+CSWAR_WAR_START = Раунд с %s!
+CSWAR_WAR_HUD = Текущий раунд: ^nвойна с %s!
+
+CSWAR_RESTRICT_IN_WAR = Команда запрещена !yв раунде на %s!
+CSWAR_CURRENT_WAR = Сейчас идет война на !y%s!
+CSWAR_POINT_CHAT = %s лидер по очкам !yс %d очками!
+CSWAR_COMMAND_RESTRICT = Команда запрещена!
+
+CSWAR_VOTE_START = Голосование !yуже началось!
+CSWAR_ADMIN_VOTE = АДМИНИСТРАТОР %s начал !yголосование за %s!
+CSWAR_VOTE_TIME = %d секунд !yчтобы проголосовать!
+CSWAR_VOTE_SUCCESS = Голосование успешно!
+CSWAR_VOTE_FAILED = Голосование провалилось!
+CSWAR_NO_VOTE = Нельзя голосовать в !yраунде на %s!
+
+CSWAR_NEXT_WAR = Следующая война !yвойна на %s!
+
+[da]
+CSWAR_EQUAL_POINT = Der er igen point leder
+CSWAR_POINT_LEADER = %s er point leder !y|| Point: %d!
+CSWAR_NEW_LEADER = Ny point leder!
+CSWAR_SAME_LEADER = Samme point leder som før!
+CSWAR_WHOIS_LEADER = %s er den nye point leder!
+
+CSWAR_WAR_START = %s runde!
+CSWAR_WAR_HUD = Nuværende runde: ^n%s krig!
+
+CSWAR_RESTRICT_IN_WAR = Kommandoen er ikke tilgængelig !yin %s runde!
+CSWAR_CURRENT_WAR = Nu er der !y%s krig!
+CSWAR_BONUS = Gratis penge: !y$%d!
+CSWAR_COMMAND_RESTRICT = Kommandoen er ikke tilgængelig!
+
+CSWAR_VOTE_START = Afstemning er !yallerede started!
+CSWAR_ADMIN_VOTE = ADMIN %s starter !y%s afstemning!
+CSWAR_VOTE_TIME = %d sekunder !ytil afstemning!
+CSWAR_VOTE_SUCCESS = Afstemning lykkes!
+CSWAR_VOTE_FAILED = Afstemning fejlede!
+CSWAR_NO_VOTE = No voting in !y%s round!
+
+CSWAR_NEXT_WAR = Næste krig er !y%s krig!
+
+CSWAR_CON_WAR_HUD = Løbende runde: ^n%s krig! ^nResterende runder: %d!
+CSWAR_CON_WAR_START = Løbende krigs runder er startet!
+CSWAR_CON_WAR_STOP = Løbende krigs runder er stoppet!
