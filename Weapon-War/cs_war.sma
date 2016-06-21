@@ -80,7 +80,6 @@ new const AMMOTYPE[][] = { "", "357sig", "", "762nato", "", "buckshot", "", "45a
 new const MAXBPAMMO[] = { -1, 52, -1, 90, 1, 32, 1, 100, 90, 1, 120, 100, 100, 90, 90, 90, 100, 120,
 	30, 120, 200, 32, 90, 120, 90, 2, 35, 90, 90, -1, 100 }
 
-new const m_rgpPlayerItems_CWeaponBox[6] = {34,35,...}
 new const WeaponsData[][WEAPONSWAR] =
 {
 	{"Hand-gun", "9x19mm Side-arm", "weapon_glock18", CSW_GLOCK18}, 
@@ -119,7 +118,7 @@ new bool:g_bVote
 new bool:g_bLastRoundIsWar
 new bool:g_bStartConsecutive
 new bool:g_bSetCustomWar
-new bool:g_bJustDrop[33], bool:g_bBPUnlimit[33]
+new bool:g_bBPUnlimit[33]
 
 // String
 new g_sAdminFlag, g_sCurrentFlag[15]
@@ -151,7 +150,7 @@ new g_iMsgSayTxt, g_iSyncHud, g_iMsgScreenFade, g_iMsgAmmo
 
 public plugin_init() 
 {
-	register_plugin("Weapons War", "7.2", "zmd94")
+	register_plugin("Weapons War", "7.3", "zmd94")
 	
 	register_dictionary("cs_war.txt")
 	
@@ -175,12 +174,17 @@ public plugin_init()
 	RegisterHam(Ham_Spawn, "player", "cs_war_PlayerRespawn", 1)
 	RegisterHam(Ham_Killed, "player", "cs_war_PlayerKilled", 1)
 	
+	g_WarMenu = menu_create("\yWeapons War \rv7.3", "war_handler")
+    
+	new szItem[64]
 	for(new i; i < sizeof(WeaponsData); i++)
 	{
 		RegisterHam(Ham_Item_Deploy, WeaponsData[i][WeaponID], "cs_war_WeaponsDeploy", true)
+		
+		formatex(szItem, charsmax(szItem), "%s: \y%s", WeaponsData[i][WeaponType], WeaponsData[i][WeaponName])
+		menu_additem(g_WarMenu, szItem)
 	}
 	
-	register_touch("weaponbox", "player", "cs_war_WeaponBox")
 	register_touch("weapon_shield", "player", "cs_war_Shield")
 	
 	g_iAllowWarStart = register_cvar("ww_allow_war_start", "1") // Allow admin to start custom war round
@@ -230,15 +234,6 @@ public plugin_init()
 	g_iSyncHud = CreateHudSyncObj()
 	g_iMsgScreenFade = get_user_msgid("ScreenFade")
 	g_iMsgAmmo = get_user_msgid("AmmoPickup")
-	
-	g_WarMenu = menu_create("\yWeapons War \rv7.2", "war_handler")
-	
-	new szItem[64]
-	for(new i; i < sizeof(WeaponsData); i++)
-	{
-		formatex(szItem, charsmax(szItem), "%s: \y%s", WeaponsData[i][WeaponType], WeaponsData[i][WeaponName])
-		menu_additem(g_WarMenu, szItem)
-	}
 }
 
 public plugin_end()
@@ -454,6 +449,9 @@ public cs_war_new_round()
 	g_bHEWar = false
 	g_bVote = false
 	
+	arrayset(g_iAllVote, false, sizeof g_iAllVote)
+	arrayset(g_bBPUnlimit, false, sizeof g_bBPUnlimit)
+	
 	remove_task(TASK_HUD)
 	remove_task(TASK_VOTE)
 	
@@ -465,18 +463,6 @@ public cs_war_new_round()
 	if(get_pcvar_num(g_iAutoWarStart) || get_pcvar_num(g_iAllowConsecutive))
 	{
 		g_iWarCountdown ++
-	}
-	
-	new iPlayers[32], iPlayerCount, i, id
-	
-	get_players(iPlayers, iPlayerCount, "a") 
-	for(i = 0; i < iPlayerCount; i++)
-	{
-		id = iPlayers[i]
-		
-		g_bBPUnlimit[id] = false
-		g_iAllVote[id] = false
-		g_bJustDrop[id] = false
 	}
 }
 
@@ -607,7 +593,6 @@ public client_disconnect(id)
 {
 	g_iAllVote[id] = false
 	g_bBPUnlimit[id] = false
-	g_bJustDrop[id] = false
 	
 	if(get_pcvar_num(g_iPointLeader))
 	{
@@ -651,7 +636,6 @@ public cs_war_round_end()
 				}
 			}
 			
-			g_bJustDrop[id] = false
 			g_bBPUnlimit[id] = false
 			
 			remove_task(id+TASK_RESPAWN)
@@ -665,20 +649,6 @@ public cs_war_round_end()
 		copy(g_sLastWar, charsmax(g_sLastWar), g_sWeaponWar)
 		
 		ExecuteForward(g_Forwards[FW_WAR_ROUND_END], g_ForwardResult)
-		
-		if(get_pcvar_num(g_iWeaponDrop))
-		{
-			for(new i; i < sizeof(WeaponsData); i++)
-			{
-				RegisterHam(Ham_CS_Item_CanDrop, WeaponsData[i][WeaponID], "cs_war_CanDrop")
-			}
-			
-			new const WeaponCannotDrop[][] = {"weapon_knife", "weapon_hegrenade"}
-			for(new i; i < sizeof(WeaponCannotDrop); i++)
-			{
-				RegisterHam(Ham_CS_Item_CanDrop, WeaponCannotDrop[i], "cs_war_CannotDrop")
-			}
-		}
 		
 		g_bLastRoundIsWar = true
 	}
@@ -697,24 +667,29 @@ public FindLeader()
 	new iPlayers[32], iPlayerCount, iPlayerID
 	new iHighestKillPlayer
 	
-	get_players(iPlayers, iPlayerCount, "h")
+	// Same hud configuration
+	set_hudmessage(random_num(10,255), random(256), random(256), -1.0, 0.20, 0, 3.0, 6.0, 0.0, 0.0, -1)
+	
+	get_players(iPlayers, iPlayerCount, "c")
 	for(new i = 0 ; i < iPlayerCount; i++)
 	{
 		iPlayerID = iPlayers[i]
 		if(g_iKills[iPlayerID] > g_iKills[g_iCurrentTP])
 		{
 			iHighestKillPlayer = iPlayerID
-			
-			set_hudmessage(random_num(10,255), random(256), random(256), -1.0, 0.20, 0, 3.0, 6.0, 0.0, 0.0, -1)
 			show_hudmessage(0, "^n%L", LANG_PLAYER, "CSWAR_NEW_LEADER")
 		}
 		else
 		{
 			iHighestKillPlayer = g_iCurrentTP
-			
-			set_hudmessage(random_num(10,255), random(256), random(256), -1.0, 0.20, 0, 3.0, 6.0, 0.0, 0.0, -1)
 			show_hudmessage(0, "^n%L", LANG_PLAYER, "CSWAR_SAME_LEADER")
 		}
+		
+		// If there is player have more point than new top leader
+        if(g_iKills[iPlayerID] > g_iKills[iHighestKillPlayer])
+        {
+            iHighestKillPlayer = iPlayerID
+        }
 	}
 	
 	if(iHighestKillPlayer)
@@ -723,9 +698,9 @@ public FindLeader()
 	}
 }
 
-public TopPlayer(iNewPlayerID)
+TopPlayer(iNewPlayerID)
 {
-	new szName[33]
+	new szName[32]
 	get_user_name(iNewPlayerID, szName, charsmax(szName))
 	
 	flag_set(g_isPointLeader, iNewPlayerID)
@@ -773,7 +748,7 @@ public cs_war_PlayerRespawn(id)
 public cs_war_PlayerKilled(iVictim, iKiller)  
 {
 	if (!g_bInWar || !is_user_alive(iKiller) || iVictim == iKiller) 
-	return
+		return
 	
 	if(get_pcvar_num(g_iPointLeader))
 	{
@@ -784,7 +759,7 @@ public cs_war_PlayerKilled(iVictim, iKiller)
 			{
 				g_iCurrentTP = iKiller
 				
-				new szName[33]
+				new szName[32]
 				get_user_name(g_iCurrentTP, szName, charsmax(szName))
 				
 				set_hudmessage(random_num(10,255), random(256), random(256), -1.0, 0.20, 0, 3.0, 6.0, 0.0, 0.0, -1)
@@ -880,25 +855,22 @@ public cs_war_drop(id)
 {
 	if(g_bInWar)
 	{
-		if(!get_pcvar_num(g_iWeaponDrop))
+		if(get_pcvar_num(g_iWeaponDrop))
+		{
+			if(!(get_user_weapon(id) == g_WeaponIndex))
+			{
+				print_colored(id, "!g[WW]!t %L", LANG_PLAYER, "CSWAR_RESTRICT_IN_WAR", g_sWeaponWar)
+				return PLUGIN_HANDLED
+			}
+		}
+		else
 		{
 			print_colored(id, "!g[WW]!t %L", LANG_PLAYER, "CSWAR_RESTRICT_IN_WAR", g_sWeaponWar)
 			return PLUGIN_HANDLED
 		}
-		
-		g_bJustDrop[id] = true
-		set_task(3.0, "RestoreDrop", id)
 	}
 	
 	return PLUGIN_CONTINUE
-}
-
-public RestoreDrop(id)
-{
-	if(g_bInWar)
-	{
-		g_bJustDrop[id] = false
-	}
 }
 
 public cs_war_vote(id)
@@ -1190,44 +1162,8 @@ public StartWar()
 	set_hudmessage(random_num(10,255), random(256), random(256), -1.0, 0.20, 0, 6.0, 12.0, 0.0, 0.0, -1)
 	show_hudmessage(0, "%L", LANG_PLAYER, "CSWAR_WAR_START", g_sWeaponWar)
 	
-	
 	// Execute war round started forward
 	ExecuteForward(g_Forwards[FW_WAR_ROUND_START], g_ForwardResult)
-	
-	if(get_pcvar_num(g_iWeaponDrop))
-	{
-		for(new i; i < sizeof(WeaponsData); i++)
-		{
-			RegisterHam(Ham_CS_Item_CanDrop, WeaponsData[i][WeaponID], "cs_war_CannotDrop")
-		}
-		
-		RegisterHam(Ham_CS_Item_CanDrop, g_sWeaponID, "cs_war_CanDrop")
-		
-		new const WeaponCannotDrop[][] = {"weapon_knife", "weapon_hegrenade"}
-		for(new i; i < sizeof(WeaponCannotDrop); i++)
-		{
-			RegisterHam(Ham_CS_Item_CanDrop, WeaponCannotDrop[i], "cs_war_CannotDrop")
-		}
-	}
-}
-
-// Credit to ConnorMcLeod: https://forums.alliedmods.net/showthread.php?p=1117804
-public cs_war_CanDrop(iEnt)
-{
-	if(!pev_valid(iEnt))
-	return HAM_IGNORED
-	
-	SetHamReturnInteger(1)
-	return HAM_SUPERCEDE
-}
-
-public cs_war_CannotDrop(iEnt)
-{
-	if(!pev_valid(iEnt))
-	return HAM_IGNORED
-	
-	SetHamReturnInteger(0)
-	return HAM_SUPERCEDE
 }
 
 // Credit to ZP Team
@@ -1236,19 +1172,19 @@ public cs_war_ammo(id)
 {
 	// Not alive or not human
 	if (!is_user_alive(id) || !g_bInWar || !g_bBPUnlimit[id])
-	return;
+		return;
 	
 	// This is to get ammo type
 	new type = read_data(1)
 	if (type >= sizeof WEAPONID)
-	return;
+		return;
 	
 	// This is to get weapon's id
 	new weapon = WEAPONID[type]
 	
 	// Primary and secondary only
 	if (MAXBPAMMO[weapon] <= 2)
-	return;
+		return;
 	
 	// This is to get ammo amount
 	new amount = read_data(2)
@@ -1270,7 +1206,7 @@ public Refill_BPAmmo(const args[], id)
 {
 	// Player died or 
 	if (!is_user_alive(id) || !g_bInWar || !g_bBPUnlimit[id])
-	return;
+		return;
 	
 	new g_iStatus = get_msg_block(g_iMsgAmmo)
 	set_msg_block(g_iMsgAmmo, BLOCK_ONCE)
@@ -1300,23 +1236,6 @@ public WarHud()
 	}
 }
 
-// Credit to ConnorMcLeod: https://forums.alliedmods.net/showthread.php?t=235139
-public cs_war_WeaponBox(ent, id)
-{
-	if(get_pcvar_num(g_iWeaponDrop) && g_bInWar && is_user_alive(id) && pev_valid(ent))
-	{
-		new iId = GetWeaponBoxWeaponType(ent)
-		if(!g_bJustDrop[id] && iId == g_WeaponIndex)
-		{
-			if(!(cs_get_user_bpammo(id, iId) == 0))
-			{
-				give_item(id, g_sWeaponID)
-				cs_set_user_bpammo(id, g_WeaponIndex, cs_get_user_bpammo(id, iId))
-			}
-		}
-	}
-}
-
 public cs_war_Shield(ent, id)
 {
 	if(get_pcvar_num(g_iNoShield) && g_bInWar && pev_valid(ent))
@@ -1325,21 +1244,6 @@ public cs_war_Shield(ent, id)
 	}
 	
 	return PLUGIN_CONTINUE
-}
-
-GetWeaponBoxWeaponType(ent)
-{
-	new iId
-	for(new i = 1; i<= 5; i++)
-	{
-		iId = get_pdata_cbase(ent, m_rgpPlayerItems_CWeaponBox[i], XO_WEAPONS)
-		if(iId > 0)
-		{
-			return cs_get_weapon_id(iId)
-		}
-	}
-
-	return 0
 }
 
 // Credit to xPaw: https://forums.alliedmods.net/showpost.php?p=1127588&postcount=4
@@ -1390,17 +1294,17 @@ stock cs_strip_weapon(id, sWeaponID[])
 
 stock print_colored(const index, const input [ ], const any:...)
 { 
-	new message[191]
-	vformat(message, 190, input, 3)
-	replace_all(message, 190, "!y", "^1")
-	replace_all(message, 190, "!t", "^3")
-	replace_all(message, 190, "!g", "^4")
+	new szMessage[191]
+	vformat(szMessage, charsmax(szMessage), input, 3)
+	replace_all(szMessage, charsmax(szMessage), "!y", "^1")
+	replace_all(szMessage, charsmax(szMessage), "!t", "^3")
+	replace_all(szMessage, charsmax(szMessage), "!g", "^4")
 
 	if(index)
 	{
 		message_begin(MSG_ONE_UNRELIABLE , g_iMsgSayTxt, _, index)
 		write_byte(index)
-		write_string(message)
+		write_string(szMessage)
 		message_end()
 	}
 	else
@@ -1414,7 +1318,7 @@ stock print_colored(const index, const input [ ], const any:...)
 
 			message_begin(MSG_ONE_UNRELIABLE, g_iMsgSayTxt, _, id)
 			write_byte(id)
-			write_string(message)
+			write_string(szMessage)
 			message_end()
 		}
 	}
